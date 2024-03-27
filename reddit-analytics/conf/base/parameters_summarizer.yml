@@ -5,7 +5,8 @@
 # Link: https://docs.kedro.org/en/0.19.3/configuration/parameters.html
 
 subreddit_name: r/LifeProTips
-
+# https://www.reddit.com/r/LifeProTips/new/
+# Other options:
 # [
 #     "r/jokes",
 #     "r/askscience",
@@ -15,8 +16,18 @@ subreddit_name: r/LifeProTips
 #     "r/AmItheAsshole"
 # ]
 
-submission_limit: 3
+submission_limit: 2
 
 models:
   summarizer: sshleifer/distilbart-cnn-12-6
   mask_filler: Twitter/twhin-bert-base
+
+
+llm_inference:
+  model: llama2
+  analyses:
+    - description: summary
+      prompt: Summarize this Reddit submission.
+    # To add
+    - description: hashtags
+      prompt: Create 5 hashtags for this Reddit submission.

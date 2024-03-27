@@ -15,6 +15,9 @@ from pydantic import BaseModel, TypeAdapter
 
 from transformers import pipeline
 
+from openai import OpenAI
+import ollama
+
 
 def fetch_submissions(subreddit_name, submission_limit) -> pl.DataFrame:
     """Fetch."""
@@ -22,7 +25,6 @@ def fetch_submissions(subreddit_name, submission_limit) -> pl.DataFrame:
     reddit_client_secret = os.environ["REDDIT_SECRET"]
     reddit_username = os.environ["REDDIT_USERNAME"]  # Just for assembling the user agent
 
-    # Read-only Reddit connection https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#read-only-reddit-instances
     reddit = Reddit(
         client_id=reddit_client_id,
         client_secret=reddit_client_secret,
@@ -90,6 +92,8 @@ def summarize_submissions(submissions_raw: pl.DataFrame, models: dict) -> pl.Dat
     return df
 
 
+# Helper functions
+
 
 def get_hashtags(text, mask_filler_model) -> list[str]:
     results = mask_filler_model(text.strip() + " #<mask>")
@@ -108,3 +112,45 @@ def get_hashtags(text, mask_filler_model) -> list[str]:
 def get_summary(text, summarizer_model) -> str:
     summary = summarizer_model(text)[0]["summary_text"].strip()
     return summary
+
+
+# Optional: LLM inference
+
+
+def llm_inference(submissions_raw: pl.DataFrame, params: dict) -> pl.DataFrame:
+    ollama.pull("llama2")
+
+    client = OpenAI(
+        base_url = "http://localhost:11434/v1",
+        api_key = "ollama",
+    )
+
+    df = submissions_raw
+
+    model = params["model"]
+    for analysis in params["analyses"]:
+        description = analysis["description"]
+        prompt = analysis["prompt"]
+        df = df.with_columns(
+            pl.col("selftext").map_elements(
+                lambda text: get_llm_response(
+                    client, 
+                    model, 
+                    f'This is a Reddit submission:{text}\n\n{prompt}'
+                )
+            ).alias(description),
+        )
+
+    df = df.select(
+        pl.col("author_name", "creation_datetime", "permalink", "title", "selftext", *[analysis["description"] for analysis in params["analyses"]])
+    )
+
+    return df
+
+
+def get_llm_response(client: OpenAI, model: str, prompt: str) -> str:
+    response = client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model=model,
+    )
+    return response.choices[0].message.content

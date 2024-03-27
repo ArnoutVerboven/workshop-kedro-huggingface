@@ -6,3 +6,7 @@ submissions_summaries:
   type: polars.CSVDataset
   filepath: data/submissions-summaries.csv
   
+# To add
+submissions_llm_summaries:
+  type: polars.CSVDataset
+  filepath: data/submissions-llm-summaries.csv
