@@ -1,0 +1,8 @@
+submissions_raw:
+  type: polars.CSVDataset
+  filepath: data/submissions-raw.csv
+
+submissions_summaries:
+  type: polars.CSVDataset
+  filepath: data/submissions-summaries.csv
+  

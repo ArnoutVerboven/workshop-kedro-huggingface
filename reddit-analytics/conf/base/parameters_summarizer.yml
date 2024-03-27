@@ -1,0 +1,22 @@
+# This is a boilerplate parameters config generated for pipeline 'summarizer'
+# using Kedro 0.19.3.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.19.3/configuration/parameters.html
+
+subreddit_name: r/LifeProTips
+
+# [
+#     "r/jokes",
+#     "r/askscience",
+#     "r/explainlikeimfive",
+#     "r/LifeProTips",
+#     "r/GetMotivated",
+#     "r/AmItheAsshole"
+# ]
+
+submission_limit: 3
+
+models:
+  summarizer: sshleifer/distilbart-cnn-12-6
+  mask_filler: Twitter/twhin-bert-base
