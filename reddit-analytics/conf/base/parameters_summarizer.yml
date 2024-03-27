@@ -28,6 +28,3 @@ llm_inference:
   analyses:
     - description: summary
       prompt: Summarize this Reddit submission.
-    # To add
-    - description: hashtags
-      prompt: Create 5 hashtags for this Reddit submission.
